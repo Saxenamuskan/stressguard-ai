@@ -400,9 +400,8 @@ def assign_employee(employee_id, manager_id):
         conn.commit()
         return True
 
-    except sqlite3.IntegrityError as e:
-        conn.rollback()
-        raise Exception(f"DB ERROR: {e}")
+    except sqlite3.IntegrityError:
+        return False
 
     finally:
         conn.close()
