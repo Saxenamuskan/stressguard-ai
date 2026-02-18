@@ -374,9 +374,9 @@ def get_available_employees(manager_id):
 
     cursor.execute("""
          SELECT id, username
-        FROM users
-        WHERE role = 'employee'
-        AND id NOT IN (
+         FROM users
+         WHERE role = 'employee'
+         AND id NOT IN (
             SELECT employee_id
             FROM manager_team
             WHERE manager_id = ?
@@ -388,10 +388,26 @@ def get_available_employees(manager_id):
     return rows
 
 def assign_employee(employee_id, manager_id):
+    employee_id = int(employee_id)
+    manager_id = int(manager_id)
     conn = get_connection()
     cursor = conn.cursor()
 
     try:
+        # Check manager exists
+        cursor.execute("SELECT id FROM users WHERE id=? AND LOWER(role)='manager'", (manager_id,))
+        manager = cursor.fetchone()
+
+        # Check employee exists
+        cursor.execute("SELECT id FROM users WHERE id=? AND LOWER(role)='employee'", (employee_id,))
+        employee = cursor.fetchone()
+
+        if not manager:
+            raise Exception("Invalid manager ID")
+
+        if not employee:
+            raise Exception("Invalid employee ID")
+
         cursor.execute("""
             INSERT INTO manager_team (manager_id, employee_id)
             VALUES (?, ?)

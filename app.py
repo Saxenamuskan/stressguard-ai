@@ -228,12 +228,20 @@ def manager_dashboard():
             else:
                  for name in selected:
 
-                     emp_id = df_available[
-                         df_available["username"] == name
-                     ]["id"].values[0]
-                     
-                     assign_employee(emp_id, user["id"])
+                     emp_row = df_available[df_available["username"] == name]
 
+                     if emp_row.empty:
+                         st.error("Employee not found.")
+                         continue
+
+                     emp_id = emp_row["id"].values[0]
+                     
+                     success = assign_employee(emp_id, user["id"])
+
+                     if success:
+                            st.success("Employee added successfully!")
+                     else:
+                             st.warning("Employee already in your team.")
                  st.success("Employees added successfully ✅")
                  st.rerun()
   
