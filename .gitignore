@@ -5,3 +5,4 @@ venv311/
 *.pyc
 stressguard.db
 .streamlit/
+.DS_Store
