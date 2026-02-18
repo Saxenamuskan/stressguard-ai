@@ -12,8 +12,13 @@ DB_NAME = os.path.join(os.getcwd(), "stressguard.db")
 # =====================================================
 
 def get_connection():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    # Persistent path for Streamlit Cloud
+    if os.path.exists("/mount/data"):
+        db_path = "/mount/data/stressguard.db"
+    else:
+        db_path = "stressguard.db"
+
+    conn = sqlite3.connect(db_path, check_same_thread=False)
     conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
@@ -382,7 +387,6 @@ def get_available_employees(manager_id):
     return rows
 
 def assign_employee(employee_id, manager_id):
-    print("Trying to insert:", manager_id, employee_id)
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -393,12 +397,11 @@ def assign_employee(employee_id, manager_id):
         """, (manager_id, employee_id))
 
         conn.commit()
-        print("ASSIGNED:", manager_id, employee_id)
         return True
 
     except sqlite3.IntegrityError as e:
-        print("DB ERROR:", e)
-        return False
+        conn.rollback()
+        raise Exception(f"DB ERROR: {e}")
 
     finally:
         conn.close()
