@@ -6,3 +6,4 @@ python-dotenv==1.0.1
 pandas>=2.2.2
 textblob
 plotly>=5.22.0
+groq
